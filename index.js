@@ -73,10 +73,20 @@ module.exports = function (opts) {
 
       // Loop through prop paths and parse each prop for errors
       propPaths.forEach(function (propPath) {
-        var error = errorParser(_.deepGet(config, propPath), propPath);
+        var shouldBeIgnored = false;
 
-        if (error) {
-          errors.push(error);
+        options.ignoredPaths.forEach(function (ignoredPath) {
+          if (propPath.indexOf(ignoredPath) !== -1) {
+            shouldBeIgnored = true;
+          }
+        });
+
+        if (!shouldBeIgnored) {
+          var error = errorParser(_.deepGet(config, propPath), propPath);
+
+          if (error) {
+            errors.push(error);
+          }
         }
       });
 

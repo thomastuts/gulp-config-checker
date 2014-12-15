@@ -6,7 +6,8 @@ var configChecker = require('./index');
 gulp.task('run:json', function () {
   return gulp.src('fixtures/config.json')
     .pipe(configChecker({
-      template: 'fixtures/config.base.json'
+      template: 'fixtures/config.base.json',
+      ignoredPaths: ['deeper']
     }));
 });
 

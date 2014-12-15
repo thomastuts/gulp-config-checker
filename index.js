@@ -6,20 +6,19 @@ var assign = require('object-assign');
 var _ = require("lodash");
 _.mixin(require("lodash-deep"));
 
+var getPropPaths = require('./lib/get-prop-paths');
+var errorParser = require('./lib/error-parser');
+var errors = require('./lib/errors');
 var fs = require('fs');
 
 /**
- *
- * Expected result:
- * error: fruitCount.banana is missing
- * warning: veggies is empty
  *
  * options:
  * template location
  * throw on warning
  * transformer for config template and config (exposes file's string, expects a modified string)
  * future: optional ignored fields
- * future: rules for properties, i.e. a number can't be greater than a value, ...
+ * future: rules for properties, i.e. a number can't be greater than a value, type checking, ...
  *
  */
 
@@ -27,12 +26,11 @@ module.exports = function (opts) {
   return through.obj(function (configFile, enc, cb) {
 
     if (configFile.isNull()) {
-      cb(null, configFile);
-      return;
+      cb(new gutil.PluginError('gulp-config-checker', errors.files.NO_CONFIG));
     }
 
     if (configFile.isStream()) {
-      cb(new gutil.PluginError('gulp-config-checker', 'Streaming not supported'));
+      cb(new gutil.PluginError('gulp-config-checker', errors.files.NO_STREAM));
       return;
     }
 
@@ -47,7 +45,7 @@ module.exports = function (opts) {
     var configString = configFile.contents.toString();
 
     if (!options.template) {
-      cb(new gutil.PluginError('gulp-config-checker', 'The template property is required'));
+      cb(new gutil.PluginError('gulp-config-checker', errors.files.TEMPLATE_REQ));
     }
 
     // If an optional transformer is given, transform the file before parsing it to JSON
@@ -73,45 +71,12 @@ module.exports = function (opts) {
         template = JSON.parse(template)
       }
 
-      function parsePropForError(prop, path) {
-        if (prop === undefined) {
-          console.log('Error for prop:', prop);
-          return 'The `' + path + '` property is undefined';
-        }
-
-        if (prop === '') {
-          return 'The `' + path + '` property is empty';
-        }
-      }
-
-      function generatePropPaths(obj) {
-        var propPaths = [];
-
-        for (var prop in obj) {
-
-          if (typeof obj[prop] === 'object') {
-            // Recursively loop through this object too
-            var childProps = generatePropPaths(obj[prop]);
-
-            childProps.forEach(function (childProp) {
-              propPaths.push(prop + '.' + childProp);
-            });
-          }
-          else {
-            propPaths.push(prop);
-          }
-
-        }
-
-        return propPaths;
-      }
-
       // Generate paths for all possible config props
-      var propPaths = generatePropPaths(template);
+      var propPaths = getPropPaths(template);
 
       // Loop through prop paths and parse for errors
       propPaths.forEach(function (prop) {
-        var error = parsePropForError(_.deepGet(config, prop), prop);
+        var error = errorParser(_.deepGet(config, prop), prop);
 
         if (error) {
           errors.push(error);

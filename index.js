@@ -75,11 +75,13 @@ module.exports = function (opts) {
       propPaths.forEach(function (propPath) {
         var shouldBeIgnored = false;
 
-        options.ignoredPaths.forEach(function (ignoredPath) {
-          if (propPath.indexOf(ignoredPath) !== -1) {
-            shouldBeIgnored = true;
-          }
-        });
+        if (options.ignoredPaths) {
+          options.ignoredPaths.forEach(function (ignoredPath) {
+            if (propPath.indexOf(ignoredPath) !== -1) {
+              shouldBeIgnored = true;
+            }
+          });
+        }
 
         if (!shouldBeIgnored) {
           var error = errorParser(_.deepGet(config, propPath), propPath);

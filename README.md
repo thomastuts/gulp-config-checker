@@ -7,7 +7,7 @@ Checks a config against a configuration template, and warns you of any missing p
 
 As an example, in your codebase you would have a file called `config.base.js`
 
-```
+```json
 // config.base.json
 
 {
@@ -19,7 +19,7 @@ As an example, in your codebase you would have a file called `config.base.js`
 
 You also have a `config.js` file which contains all the sensitive data, and is not committed in your VCS. This config file basically mirrors the template:
 
-```
+```json
 // config.json
 
 {
@@ -41,7 +41,7 @@ However, the real issue is with keeping it up-to-date, and verifying that config
 2. Install the plugin: `npm install --save-dev gulp-config-checker`
 3. Add the Gulp task:
 
-```
+```js
 var gulp = require('gulp');
 var configChecker = require('./index');
 
@@ -83,7 +83,7 @@ These are two methods that take in the file's contents, which you can then alter
 Sometimes, you don't have a JSON file for configuration, but a JS file with a JSON-like object. For example:
 
 
-```
+```js
 // config.base.js
 
 var CONFIG = {
@@ -93,7 +93,7 @@ var CONFIG = {
 };
 ```
 
-```
+```js
 // config.js
 
 var CONFIG = {
@@ -105,7 +105,7 @@ var CONFIG = {
 
 These files are read as a string and then parsed as JSON. Needless to say, the JSON parsing would fail in this case. That's where the transforms come in. You can remove the extra JS syntax by replacing things in the string. This will ensure that we get a proper JSON string which can then be used to check the configuration. Feel free to use whatever trickery you can think of to convert your configuration to JSON, as long as you return a JSON string the plugin will be happy.
 
-```
+```js
 gulp.task('check-config', function () {
   return gulp.src('config.json')
     .pipe(configChecker({

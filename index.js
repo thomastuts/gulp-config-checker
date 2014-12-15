@@ -8,7 +8,7 @@ _.mixin(require("lodash-deep"));
 
 var getPropPaths = require('./lib/get-prop-paths');
 var errorParser = require('./lib/error-parser');
-var errors = require('./lib/errors');
+var errorMessages = require('./lib/errors');
 var fs = require('fs');
 
 /**
@@ -34,38 +34,42 @@ module.exports = function (opts) {
     var errors = [];
 
     if (configFile.isNull()) {
-      cb(new gutil.PluginError('gulp-config-checker', errors.files.NO_CONFIG));
+      cb(new gutil.PluginError('gulp-config-checker', errorMessages.files.NO_CONFIG));
     }
 
     if (configFile.isStream()) {
-      cb(new gutil.PluginError('gulp-config-checker', errors.files.NO_STREAM));
+      cb(new gutil.PluginError('gulp-config-checker', errorMessages.files.NO_STREAM));
       return;
     }
 
     if (!options.template) {
-      cb(new gutil.PluginError('gulp-config-checker', errors.files.TEMPLATE_REQ));
+      cb(new gutil.PluginError('gulp-config-checker', errorMessages.files.TEMPLATE_REQ));
     }
 
     // If an optional transformer is given, transform the file before parsing it to JSON
-    if (options.transforms.config) {
-      config = JSON.parse(options.transforms.config(configFile.contents.toString()));
+    config = options.transforms.config ? options.transforms.config(configFile.contents.toString()) : configFile.contents.toString();
+
+    try {
+      config = JSON.parse(config);
     }
-    else {
-      config = JSON.parse(configFile.contents.toString())
+    catch (e) {
+      return cb(new gutil.PluginError('gulp-config-checker', errorMessages.files.INVALID_JSON_CONFIG));
     }
 
     // Read the template file
     fs.readFile(options.template, 'utf-8', function (err, templateFile) {
       if (err) {
-        return cb(new gutil.PluginError('gulp-config-checker', errors.files.NO_TEMPLATE));
+        return cb(new gutil.PluginError('gulp-config-checker', errorMessages.files.NO_TEMPLATE));
       }
 
       // If an optional transformer is given, transform the file before parsing it to JSON
-      if (options.transforms.template) {
-        template = JSON.parse(options.transforms.template(templateFile));
+      template = options.transforms.template ? options.transforms.template(templateFile) : templateFile;
+
+      try {
+        template = JSON.parse(template);
       }
-      else {
-        template = JSON.parse(templateFile)
+      catch (e) {
+        return cb(new gutil.PluginError('gulp-config-checker', errorMessages.files.INVALID_JSON_TEMPLATE));
       }
 
       // Generate paths for all possible config props

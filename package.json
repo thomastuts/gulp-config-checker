@@ -1,6 +1,6 @@
 {
   "name": "gulp-config-checker",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Checks a given config file against a config template for validity",
   "main": "index.js",
   "dependencies": {

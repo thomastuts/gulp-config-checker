@@ -25,6 +25,14 @@ var fs = require('fs');
 module.exports = function (opts) {
   return through.obj(function (configFile, enc, cb) {
 
+    var options = assign({
+      throwOnWarning: true,
+      transforms: {}
+    }, opts);
+
+    var config, template;
+    var errors = [];
+
     if (configFile.isNull()) {
       cb(new gutil.PluginError('gulp-config-checker', errors.files.NO_CONFIG));
     }
@@ -34,49 +42,38 @@ module.exports = function (opts) {
       return;
     }
 
-    var options = assign({
-      throwOnWarning: true,
-      transforms: {}
-    }, opts);
-
-    var config, template;
-    var errors = [];
-
-    var configString = configFile.contents.toString();
-
     if (!options.template) {
       cb(new gutil.PluginError('gulp-config-checker', errors.files.TEMPLATE_REQ));
     }
 
     // If an optional transformer is given, transform the file before parsing it to JSON
     if (options.transforms.config) {
-      config = JSON.parse(options.transforms.config(configString));
+      config = JSON.parse(options.transforms.config(configFile.contents.toString()));
     }
     else {
-      config = JSON.parse(configString)
+      config = JSON.parse(configFile.contents.toString())
     }
 
     // Read the template file
-    fs.readFile(options.template, 'utf-8', function (err, template) {
-
+    fs.readFile(options.template, 'utf-8', function (err, templateFile) {
       if (err) {
-        return cb(new gutil.PluginError('gulp-config-checker', err.message));
+        return cb(new gutil.PluginError('gulp-config-checker', errors.files.NO_TEMPLATE));
       }
 
       // If an optional transformer is given, transform the file before parsing it to JSON
       if (options.transforms.template) {
-        template = JSON.parse(options.transforms.template(template));
+        template = JSON.parse(options.transforms.template(templateFile));
       }
       else {
-        template = JSON.parse(template)
+        template = JSON.parse(templateFile)
       }
 
       // Generate paths for all possible config props
       var propPaths = getPropPaths(template);
 
-      // Loop through prop paths and parse for errors
-      propPaths.forEach(function (prop) {
-        var error = errorParser(_.deepGet(config, prop), prop);
+      // Loop through prop paths and parse each prop for errors
+      propPaths.forEach(function (propPath) {
+        var error = errorParser(_.deepGet(config, propPath), propPath);
 
         if (error) {
           errors.push(error);

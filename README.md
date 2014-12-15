@@ -24,8 +24,7 @@ You also have a `config.js` file which contains all the sensitive data, and is n
 
 {
   "apiUrl": "http://api.example.com",
-  "apiKey": "",
-  "environment": "development"
+  "apiKey": ""
 }
 ```
 
@@ -62,6 +61,7 @@ $ gulp check-config
 [16:48:51] Error in plugin 'gulp-config-checker'
 Message:
     The `apiKey` property is empty
+    The `environment` property is undefined
 ```
 
 **If an error is found, the task exists with an exit code of `1`, this allows you to end your build processes prematurely so you can fix things.**

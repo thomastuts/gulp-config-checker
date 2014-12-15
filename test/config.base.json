@@ -3,7 +3,11 @@
   "bar": "",
   "fruitCount": {
     "apple": "",
-    "banana": ""
+    "banana": "",
+    "deeper": {
+      "cucumber": "",
+      "lettuce": ""
+    }
   },
   "veggies": ""
 }

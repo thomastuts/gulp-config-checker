@@ -1,0 +1,36 @@
+{
+  "name": "gulp-config-checker",
+  "version": "0.0.1",
+  "description": "Checks a given config file against a config template for validity",
+  "main": "index.js",
+  "dependencies": {
+    "gulp-util": "^3.0.1",
+    "lodash": "^2.4.1",
+    "lodash-deep": "^1.4.2",
+    "object-assign": "^2.0.0",
+    "through2": "^0.6.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.10"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/thomastuts/gulp-config-checker.git"
+  },
+  "keywords": [
+    "gulpplugin",
+    "validation",
+    "configuration",
+    "config",
+    "config check",
+    "checker"
+  ],
+  "author": {
+    "name": "Thomas Tuts",
+    "email": "thomas.tuts@gmail.com"
+  },
+  "license": "MIT"
+}
